@@ -2,6 +2,7 @@ package com.dhh.apiRestSpringboot3.controller;
 
 import com.dhh.apiRestSpringboot3.dto.ClientDTO;
 import com.dhh.apiRestSpringboot3.service.ClientServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,12 +29,12 @@ public class ClientControllerImpl implements ClientController {
     }
 
     @PostMapping
-    public ResponseEntity<ClientDTO> create(@RequestBody ClientDTO clienteDTO) {
+    public ResponseEntity<ClientDTO> create(@Valid @RequestBody ClientDTO clienteDTO) {
         return ResponseEntity.status(201).body(clientServiceImpl.save(clienteDTO));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClientDTO> update(@PathVariable Long id, @RequestBody ClientDTO clienteDTO) {
+    public ResponseEntity<ClientDTO> update(@PathVariable Long id, @Valid @RequestBody ClientDTO clienteDTO) {
         return ResponseEntity.ok(clientServiceImpl.update(id, clienteDTO));
     }
 
