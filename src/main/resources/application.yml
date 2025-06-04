@@ -6,8 +6,8 @@ spring:
       enabled: true
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: 123456
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update   # Para desarrollo (en prod usa 'validate' o 'none')

@@ -23,7 +23,7 @@ public class ClientControllerIntegrationTest extends BaseIntegracionTest{
 
         mockMvc.perform(get("/api"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nombre").value("Ana"))
-                .andExpect(jsonPath("$[1].nombre").value("Juan"));
+                .andExpect(jsonPath("$[0].name").value("Ana"))
+                .andExpect(jsonPath("$[1].name").value("Juan"));
     }
 }
