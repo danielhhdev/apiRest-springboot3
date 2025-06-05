@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.dhh</groupId>
-	<artifactId>apiRest-springboot3</artifactId>
+	<artifactId>api-rest-springboot3</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>apiRest-springboot3</name>
 	<description>Demo project for Spring Boot</description>
@@ -131,6 +131,18 @@
 							<version>1.18.38</version>
 						</path>
 					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<image>
+						<builder>paketobuildpacks/builder:0.3.23</builder>
+						<env>
+							<BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+						</env>
+					</image>
 				</configuration>
 			</plugin>
 		</plugins>
