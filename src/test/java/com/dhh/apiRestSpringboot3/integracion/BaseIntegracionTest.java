@@ -26,7 +26,8 @@ public class BaseIntegracionTest {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
             .withDatabaseName("testdb")
             .withUsername("test")
-            .withPassword("test");
+            .withPassword("test")
+            .withNetworkMode("host");
 
     static {
         postgres.start();
@@ -58,9 +59,7 @@ public class BaseIntegracionTest {
     @DynamicPropertySource
     static void configure(DynamicPropertyRegistry registry) {
         String jdbcUrl = String.format(
-                "jdbc:postgresql://%s:%d/%s",
-                postgres.getHost(),
-                postgres.getFirstMappedPort(),
+                "jdbc:postgresql://localhost:5432/%s",
                 postgres.getDatabaseName()
         );
         registry.add("spring.datasource.url", () -> jdbcUrl);
