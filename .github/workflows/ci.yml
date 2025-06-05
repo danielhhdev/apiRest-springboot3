@@ -12,7 +12,6 @@ jobs:
 
     env:
       TESTCONTAINERS_RYUK_DISABLED: true
-      TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: "/var/run/docker.sock"
 
     steps:
       - name: Checkout code
@@ -29,6 +28,10 @@ jobs:
 
       - name: Check Docker version
         run: docker version
+
+      - name: Set Testcontainers Docker provider for CI
+        run: |
+          echo 'testcontainers.docker.provider=unix' > ~/.testcontainers.properties
 
       - name: Cache Maven packages
         uses: actions/cache@v4
