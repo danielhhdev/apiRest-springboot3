@@ -12,6 +12,7 @@ jobs:
 
     env:
       TESTCONTAINERS_RYUK_DISABLED: true
+      TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: "/var/run/docker.sock"
 
     steps:
       - name: Checkout code
