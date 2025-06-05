@@ -57,12 +57,13 @@ public class BaseIntegracionTest {
 
     @DynamicPropertySource
     static void configure(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", () ->
-                String.format("jdbc:postgresql://%s:%d/%s",
-                        postgres.getHost(),
-                        postgres.getFirstMappedPort(),
-                        postgres.getDatabaseName())
+        String jdbcUrl = String.format(
+                "jdbc:postgresql://%s:%d/%s",
+                postgres.getHost(),
+                postgres.getFirstMappedPort(),
+                postgres.getDatabaseName()
         );
+        registry.add("spring.datasource.url", () -> jdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
     }
