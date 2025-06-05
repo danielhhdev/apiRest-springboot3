@@ -14,6 +14,9 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
@@ -24,6 +27,20 @@ public class BaseIntegracionTest {
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test");
+
+    // --- Static block: Espera activa a que el contenedor esté listo ---
+    static {
+        postgres.start();
+        // Espera activa a que la base responda, muy importante en CI/CD
+        try (Connection c = DriverManager.getConnection(
+                postgres.getJdbcUrl(),
+                postgres.getUsername(),
+                postgres.getPassword())) {
+            // Si conecta, OK; si no, lanza excepción y falla rápido
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot connect to PostgreSQL container", e);
+        }
+    }
 
     @DynamicPropertySource
     static void configure(DynamicPropertyRegistry registry) {
