@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-@Disabled("Temporalmente deshabilitado para GitHub Actions")
 class ApiRestSpringboot3ApplicationTests{
 
 	@Test
