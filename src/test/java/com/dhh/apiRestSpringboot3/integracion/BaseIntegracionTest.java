@@ -28,30 +28,30 @@ public class BaseIntegracionTest {
             .withUsername("test")
             .withPassword("test");
 
-    // --- Static block: Espera activa a que el contenedor esté listo ---
     static {
         postgres.start();
-        // Espera activa, reintenta hasta 10 veces durante 10 segundos en total
+        // Espera activa, reintenta hasta 30 veces durante 30 segundos en total
         int attempts = 0;
-        int maxAttempts = 10;
-        while (true) {
+        int maxAttempts = 30;
+        boolean connected = false;
+        while (attempts < maxAttempts && !connected) {
             try (Connection c = DriverManager.getConnection(
                     postgres.getJdbcUrl(),
                     postgres.getUsername(),
                     postgres.getPassword())) {
-                // Conexión exitosa, la base está lista
-                break;
+                // Si conecta, la base está lista
+                connected = true;
             } catch (Exception e) {
                 attempts++;
-                if (attempts >= maxAttempts) {
-                    throw new RuntimeException("Cannot connect to PostgreSQL container after several attempts", e);
-                }
                 try {
                     Thread.sleep(1000); // Espera 1 segundo antes de reintentar
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                 }
             }
+        }
+        if (!connected) {
+            throw new RuntimeException("Cannot connect to PostgreSQL container after several attempts");
         }
     }
 
