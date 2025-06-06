@@ -1,0 +1,16 @@
+ Maven output
+target
+
+# Git repo
+.git
+.gitignore
+
+# Maven wrapper config
+.mvn
+mvnw
+mvnw.cmd
+
+# IDE files (opcional, no afecta pero te ahorra basura)
+*.iml
+.idea
+.vscode
