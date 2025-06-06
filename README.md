@@ -51,3 +51,19 @@ Estas operaciones se encuentran en `ClientControllerImpl`. El procesamiento as\u
 - Clases en `src/main/java/com/dhh/apiRestSpringboot3` implementan los controladores, servicios y mapeos de la aplicaci\u00f3n.
 
 
+
+## Docker y despliegue en Render
+
+Para construir la imagen de Docker localmente:
+
+```bash
+docker build -t api-rest-springboot3 .
+```
+
+Luego se puede ejecutar con:
+
+```bash
+docker run -p 8080:8080 api-rest-springboot3
+```
+
+En Render, crea un nuevo servicio de tipo **Docker** y proporciona este repositorio. Render ejecutará el `Dockerfile` para construir y desplegar la aplicación automáticamente.
