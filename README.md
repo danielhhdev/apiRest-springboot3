@@ -1,53 +1,60 @@
 # API REST con Spring Boot 3.5
 
-Este proyecto es una demostraci\u00f3n de una API REST desarrollada con **Spring Boot 3.5** y **Java 21**.
+Proyecto de ejemplo construido con **Spring Boot 3.5** y **Java 21**. Forma parte de mi portafolio personal y demuestra el uso de hilos virtuales y la generación de una imagen nativa para la aplicación.
 
-## Prop\u00f3sito
+## Propósito
 
-Implementar un ejemplo de backend que expone operaciones CRUD y procesamiento as\u00edncrono usando hilos virtuales.
+Implementar un backend sencillo que exponga operaciones CRUD de clientes y un procesamiento asíncrono. El proyecto sirve para explorar las nuevas capacidades de la plataforma, incluyendo la construcción de un contenedor con imagen nativa.
 
-## Tecnolog\u00edas principales
+## Tecnologías principales
 
-- **Maven** para la gesti\u00f3n del proyecto.
-- **Spring Data JPA** con **PostgreSQL** como base de datos.
+- **Maven** para la gestión y empaquetado.
+- **Spring Data JPA** + **PostgreSQL** para persistencia.
 - **MapStruct** para el mapeo entre entidades y DTOs.
-- **Lombok** para reducir c\u00f3digo boilerplate.
-- **Jakarta Validation** para validaciones de datos de entrada.
-- **SpringDoc OpenAPI** para la documentaci\u00f3n de la API.
-- Hilos virtuales para tareas as\u00edncronas (ver `VirtualThreadConfig`).
+- **Lombok** para eliminar código repetitivo.
+- **Jakarta Validation** para validar datos de entrada.
+- **SpringDoc OpenAPI** para documentar la API.
+- **Spring Boot Actuator** junto con **Micrometer** para observabilidad.
+- Procesamiento asíncrono con **hilos virtuales** (ver `VirtualThreadConfig`).
 - Pruebas con **JUnit/Mockito** y **Testcontainers**.
 
 ## Requisitos previos
 
 - **JDK 21** instalado.
-- **PostgreSQL** accesible y configurado seg\u00fan `src/main/resources/application.yml`.
+- **PostgreSQL** accesible y configurado según `src/main/resources/application.yml`.
 
-## Compilar y ejecutar
+## Imagen nativa
 
-```bash
-mvn spring-boot:run
-```
+La aplicación puede compilarse en una **imagen nativa** gracias a GraalVM y [Paketo Buildpacks](https://paketo.io/). Una imagen nativa ejecuta código máquina precompilado, lo que reduce el tiempo de arranque y el consumo de memoria, ideal para despliegues en contenedores.
 
-Para ejecutar las pruebas:
+Para construirla basta con ejecutar:
 
 ```bash
-mvn test
+mvn spring-boot:build-image
 ```
+
+El `spring-boot-maven-plugin` crea un contenedor optimizado cuando la variable `BP_NATIVE_IMAGE=true` está presente en el `pom.xml`.
 
 ## Endpoints principales
 
-- `GET /api` - Lista todos los clientes.
-- `POST /api` - Crea un nuevo cliente.
-- `PUT /api/{id}` - Actualiza un cliente existente.
-- `DELETE /api/{id}` - Elimina un cliente.
-- `GET /api/consultar-lote` - Procesa de manera as\u00edncrona un lote de clientes.
+- `GET /api` – Lista todos los clientes.
+- `POST /api` – Crea un nuevo cliente.
+- `PUT /api/{id}` – Actualiza un cliente existente.
+- `DELETE /api/{id}` – Elimina un cliente.
+- `GET /api/consultar-lote` – Procesa de forma asíncrona un lote de clientes.
 
-Estas operaciones se encuentran en `ClientControllerImpl`. El procesamiento as\u00edncrono est\u00e1 orquestado por `OrchestatorServiceImpl` y `ClientThreadVirtualServiceImpl` empleando el `virtualThreadTaskExecutor` definido en `VirtualThreadConfig`.
+El procesamiento en lote se orquesta en `OrchestatorServiceImpl` y utiliza hilos virtuales a través del `virtualThreadTaskExecutor` definido en `VirtualThreadConfig`.
 
-## Archivos y clases relevantes
+## Observabilidad
 
-- `pom.xml` define todas las dependencias y plugins mencionados.
-- `application.yml` contiene la configuraci\u00f3n de la base de datos y de SpringDoc OpenAPI.
-- Clases en `src/main/java/com/dhh/apiRestSpringboot3` implementan los controladores, servicios y mapeos de la aplicaci\u00f3n.
+El proyecto expone métricas y endpoints de salud mediante Actuator. Además, gracias a **Micrometer** y su registrador de Prometheus, se pueden recolectar métricas desde `/actuator/prometheus`.
 
+## CI y despliegue
 
+Existe un flujo de trabajo en **GitHub Actions** encargado de construir y ejecutar las pruebas con Testcontainers. Tras completarse, se solicita un despliegue en **Render** mediante su API.
+
+## Archivos destacados
+
+- `pom.xml` – Dependencias y configuración del plugin para la imagen nativa.
+- `application.yml` – Propiedades de base de datos, Swagger y Actuator.
+- Carpeta `src/main/java` – Controladores, servicios y configuración principal.
