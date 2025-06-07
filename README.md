@@ -1,60 +1,127 @@
-# API REST con Spring Boot 3.5
+# API REST con Spring Boot 3.5 + Java 21
 
-Proyecto de ejemplo construido con **Spring Boot 3.5** y **Java 21**. Forma parte de mi portafolio personal y demuestra el uso de hilos virtuales y la generación de una imagen nativa para la aplicación.
+Proyecto de ejemplo construido con **Spring Boot 3.5** y **Java 21**. Forma parte de un portafolio personal y demuestra el uso de hilos virtuales de Project Loom, procesamiento asíncrono en lotes y la generación de una imagen nativa para despliegues ligeros.
 
 ## Propósito
 
-Implementar un backend sencillo que exponga operaciones CRUD de clientes y un procesamiento asíncrono. El proyecto sirve para explorar las nuevas capacidades de la plataforma, incluyendo la construcción de un contenedor con imagen nativa.
+Implementar un backend sencillo que exponga operaciones CRUD de clientes y un procesamiento asíncrono de lotes. El proyecto sirve para explorar:
+
+- **Virtual Threads** (hilos virtuales) para alta concurrencia.
+- **GraalVM Native Image** Inicio instantáneo y consumo de memoria reducido.
+- Integración con **Spring Boot Actuator** y **Micrometer** para observabilidad.
+- Documentación automática con **SpringDoc OpenAPI (Swagger UI)**.
+- Pruebas unitarias e integración con **JUnit**, **Mockito** y **Testcontainers**.
 
 ## Tecnologías principales
 
-- **Maven** para la gestión y empaquetado.
+- **Maven** para gestión de dependencias y empaquetado.
 - **Spring Data JPA** + **PostgreSQL** para persistencia.
 - **MapStruct** para el mapeo entre entidades y DTOs.
-- **Lombok** para eliminar código repetitivo.
-- **Jakarta Validation** para validar datos de entrada.
-- **SpringDoc OpenAPI** para documentar la API.
-- **Spring Boot Actuator** junto con **Micrometer** para observabilidad.
-- Procesamiento asíncrono con **hilos virtuales** (ver `VirtualThreadConfig`).
-- Pruebas con **JUnit/Mockito** y **Testcontainers**.
+- **Lombok** para reducir código repetitivo.
+- **Jakarta Validation** para validación de datos de entrada.
+- **Spring Boot Actuator** y **Micrometer** para métricas y salud.
+- **SpringDoc OpenAPI** para generación de documentación REST.
+- **Procesamiento asíncrono** con hilos virtuales (`VirtualThreadConfig`).
+- **Pruebas** con JUnit 5, Mockito y Testcontainers.
 
-## Requisitos previos
+## Pre-requisitos
 
-- **JDK 21** instalado.
-- **PostgreSQL** accesible y configurado según `src/main/resources/application.yml`.
+- **JDK 21** instalado y en el `PATH`.
+- **PostgreSQL** accesible y configurado (ver `application.yml`).
+- (Opcional) **Docker** si se desea generar la imagen nativa localmente o ejecutar contenedores de prueba.
 
-## Imagen nativa
+## Instalación y configuración
 
-La aplicación puede compilarse en una **imagen nativa** gracias a GraalVM y [Paketo Buildpacks](https://paketo.io/). Una imagen nativa ejecuta código máquina precompilado, lo que reduce el tiempo de arranque y el consumo de memoria, ideal para despliegues en contenedores.
+1. Clonar el repositorio:
+   ```bash
+   git clone https://github.com/tu-usuario/spring-boot-3.5-java21-rest.git
+   cd spring-boot-3.5-java21-rest
+   ```
+2. Configurar la conexión a la base de datos en `src/main/resources/application.yml`:
+   ```yaml
+   spring:
+     datasource:
+       url: jdbc:postgresql://localhost:5432/mi_db
+       username: postgres
+       password: secret
+     jpa:
+       hibernate:
+         ddl-auto: update
+     threads:
+       virtual:
+         enable: true
+      
+   ```
+3. Ajustar parámetros adicionales (puertos, credenciales, etc.) según necesidad.
 
-Para construirla basta con ejecutar:
+## Construir y ejecutar
+
+### Modo JVM
 
 ```bash
-mvn spring-boot:build-image
+mvn clean spring-boot:run
 ```
 
-El `spring-boot-maven-plugin` crea un contenedor optimizado cuando la variable `BP_NATIVE_IMAGE=true` está presente en el `pom.xml`.
+### Imagen nativa (GraalVM + Paketo Buildpacks)
 
-## Endpoints principales
+1. Asegurarse de tener `BP_NATIVE_IMAGE=true` en el `pom.xml`.
+2. Ejecutar:
+   ```bash
+   mvn clean spring-boot:build-image
+   docker run --rm -p 8080:8080 tu-imagen-nativa:latest
+   ```
 
-- `GET /api` – Lista todos los clientes.
-- `POST /api` – Crea un nuevo cliente.
-- `PUT /api/{id}` – Actualiza un cliente existente.
-- `DELETE /api/{id}` – Elimina un cliente.
-- `GET /api/consultar-lote` – Procesa de forma asíncrona un lote de clientes.
+## Endpoints REST
 
-El procesamiento en lote se orquesta en `OrchestatorServiceImpl` y utiliza hilos virtuales a través del `virtualThreadTaskExecutor` definido en `VirtualThreadConfig`.
+| Método | Ruta                   | Descripción                      |
+|-------:|------------------------|----------------------------------|
+| GET    | `/api`                 | Listar todos los clientes        |
+| POST   | `/api`                 | Crear un nuevo cliente           |
+| PUT    | `/api/{id}`            | Actualizar un cliente existente  |
+| DELETE | `/api/{id}`            | Eliminar un cliente              |
+| GET    | `/api/consultar-lote`  | Procesar un lote de clientes     |
 
-## Observabilidad
+## Procesamiento asíncrono de lotes
 
-El proyecto expone métricas y endpoints de salud mediante Actuator. Además, gracias a **Micrometer** y su registrador de Prometheus, se pueden recolectar métricas desde `/actuator/prometheus`.
+- Servicio orquestador: `OrchestratorServiceImpl`.
+- Configuración de hilos virtuales en `VirtualThreadConfig`:
+  ```java
+  @Bean
+  VirtualThreadTaskExecutor virtualThreadTaskExecutor() {
+      return new VirtualThreadTaskExecutor();
+  }
+  ```
+- El endpoint dispara tareas en hilos virtuales, maneja resultados de forma no bloqueante.
 
-## CI y despliegue
+## Observabilidad y métricas
 
-Existe un flujo de trabajo en **GitHub Actions** encargado de construir y ejecutar las pruebas con Testcontainers. Tras completarse, se solicita un despliegue en **Render** mediante su API.
+- Endpoints de Actuator:
+    - `/actuator/health`
+    - `/actuator/metrics`
+    - `/actuator/prometheus` (Micrometer)
+- Trazas distribuidas con OpenTelemetry.
 
-## Archivos destacados
+## Pruebas
 
-- `pom.xml` – Dependencias y configuración del plugin para la imagen nativa.
-- `application.yml` – Propiedades de base de datos, Swagger y Actuator.
-- Carpeta `src/main/java` – Controladores, servicios y configuración principal.
+- **Unitarias**: JUnit 5 + Mockito (`mvn test`).
+- **Integración**: Testcontainers para PostgreSQL.
+
+## CI / CD
+
+Flujo de GitHub Actions para:
+
+1. Ejecutar pruebas unitarias e integración.
+2. Construir y empaquetar la aplicación.
+3. Generar y publicar la imagen nativa.
+4. (Opcional) Desplegar a Render u otro servicio.
+
+## Contribuciones
+
+1. Hacer fork del repositorio.
+2. Crear una rama feature (`git checkout -b feature/nueva-funcionalidad`).
+3. Realizar cambios y commit.
+4. Enviar pull request.
+
+## Licencia
+
+Este proyecto está bajo la **Licencia MIT**.
